@@ -1,0 +1,2 @@
+create table boleto(	uuid uuid primary key, valor numeric(10, 2) not null,	vencimento date not null ,	uuid_associado uuid not null,documento_pagador varchar(14) not null,nome_pagador varchar(50) not null,situacao varchar not null,nome_fantasia_pagador varchar(50));
+create unique index uq_boleto_uuid_uuid_associado on boleto(uuid, uuid_associado);
