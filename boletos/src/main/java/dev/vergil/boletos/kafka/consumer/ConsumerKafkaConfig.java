@@ -8,6 +8,7 @@ import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.kafka.common.serialization.StringSerializer;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.config.TopicBuilder;
@@ -26,6 +27,15 @@ import java.util.Map;
 @Configuration
 public class ConsumerKafkaConfig {
 
+    @Value("${spring.kafka.bootstrap-servers}")
+    private String boostrapServers;
+
+    @Value("${topics.associado-response}")
+    private String associadoResponse;
+
+    @Value("${spring.kafka.consumer.group-id}")
+    private String groupId;
+
     @Bean
     public ProducerFactory<String, String> requestProducerFactory() {
         return new DefaultKafkaProducerFactory<>(producerProps(), new StringSerializer(), new JsonSerializer<>());
@@ -42,21 +52,21 @@ public class ConsumerKafkaConfig {
 
     @Bean
     public KafkaMessageListenerContainer<String, AssociadoResponse> replyContainer(ConsumerFactory<String, AssociadoResponse> cf) {
-        ContainerProperties containerProperties = new ContainerProperties("response");
-        containerProperties.setGroupId("client-side-replyto-group-id");
+        ContainerProperties containerProperties = new ContainerProperties(associadoResponse);
+        containerProperties.setGroupId(groupId);
         return new KafkaMessageListenerContainer<>(cf, containerProperties);
     }
 
 
     @Bean
     public NewTopic response() {
-        return TopicBuilder.name("response").partitions(1).replicas(1).build();
+        return TopicBuilder.name(associadoResponse).partitions(1).replicas(1).build();
     }
 
     private Map<String, Object> producerProps() {
         Map<String, Object> props = new HashMap<>();
 
-        props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
+        props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, boostrapServers);
         props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
         props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, String.class);
 
@@ -66,7 +76,7 @@ public class ConsumerKafkaConfig {
     @Bean
     public Map<String, Object> consumerConfigs() {
         Map<String, Object> props = new HashMap<>();
-        props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
+        props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, boostrapServers);
         props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
         props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, JsonDeserializer.class);
         props.put(JsonDeserializer.TRUSTED_PACKAGES, "dev.vergil.*");
