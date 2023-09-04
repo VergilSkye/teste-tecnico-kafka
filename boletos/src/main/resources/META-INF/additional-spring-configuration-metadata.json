@@ -1,0 +1,23 @@
+{
+  "properties": [
+    {
+      "name": "topics.associado-request",
+      "type": "java.lang.String",
+      "description": "Description for topics.associado-request."
+    },
+    {
+      "name": "topics.associado-response",
+      "type": "java.lang.String",
+      "description": "Description for topics.associado-response."
+    },
+    {
+      "name": "topics.boleto-request",
+      "type": "java.lang.String",
+      "description": "Description for topics.boleto-request."
+    },
+    {
+      "name": "topics.boleto-response",
+      "type": "java.lang.String",
+      "description": "Description for topics.boleto-response."
+    }
+  ] }
