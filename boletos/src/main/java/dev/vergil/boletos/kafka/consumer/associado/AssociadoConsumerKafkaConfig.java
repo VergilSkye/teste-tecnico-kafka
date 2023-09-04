@@ -1,4 +1,4 @@
-package dev.vergil.boletos.kafka.consumer;
+package dev.vergil.boletos.kafka.consumer.associado;
 
 
 import dev.vergil.library.kafka.model.AssociadoResponse;
@@ -25,7 +25,7 @@ import java.util.Map;
 
 @Slf4j
 @Configuration
-public class ConsumerKafkaConfig {
+public class AssociadoConsumerKafkaConfig {
 
     @Value("${spring.kafka.bootstrap-servers}")
     private String boostrapServers;
@@ -73,7 +73,7 @@ public class ConsumerKafkaConfig {
         return props;
     }
 
-    @Bean
+
     public Map<String, Object> consumerConfigs() {
         Map<String, Object> props = new HashMap<>();
         props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, boostrapServers);

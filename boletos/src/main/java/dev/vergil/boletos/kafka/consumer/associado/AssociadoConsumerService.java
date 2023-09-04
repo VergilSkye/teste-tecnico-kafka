@@ -1,4 +1,4 @@
-package dev.vergil.boletos.kafka.consumer;
+package dev.vergil.boletos.kafka.consumer.associado;
 
 
 import dev.vergil.library.kafka.model.AssociadoResponse;
