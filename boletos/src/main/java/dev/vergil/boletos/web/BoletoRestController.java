@@ -52,14 +52,14 @@ public class BoletoRestController {
     }
 
 
-    @PutMapping("/boletos/{uuid}")
+    @PutMapping("/boletos/{id}")
     public ResponseEntity<BoletoDTO> updateBoleto(
-            @PathVariable(value = "uuid") final UUID id,
+            @PathVariable(value = "id") final Long uuid,
             @Valid @RequestBody BoletoDTO boletoDTO
     ) throws URISyntaxException {
-        log.debug("REST request to update Boleto : {}, {}", id, boletoDTO);
+        log.debug("REST request to update Boleto : {}, {}", uuid, boletoDTO);
 
-        if (!boletoRepository.existsById(id)) {
+        if (!boletoRepository.existsById(uuid)) {
             //throw new BadRequestAlertException("Entity not found", ENTITY_NAME, "idnotfound");
         }
 
@@ -76,10 +76,10 @@ public class BoletoRestController {
         return boletoService.findAll();
     }
 
-    @GetMapping("/boletos/{uuid}")
-    public ResponseEntity<BoletoDTO> getBoleto(@PathVariable UUID uuid) {
-        log.debug("REST request to get Boleto : {}", uuid);
-        Optional<BoletoDTO> boletoDTO = boletoService.findOne(uuid);
+    @GetMapping("/boletos/{id}")
+    public ResponseEntity<BoletoDTO> getBoleto(@PathVariable Long id) {
+        log.debug("REST request to get Boleto : {}", id);
+        Optional<BoletoDTO> boletoDTO = boletoService.findOne(id);
         return boletoDTO.map(response -> ResponseEntity.ok().body(response))
                 .orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
@@ -92,7 +92,7 @@ public class BoletoRestController {
 
 
     @DeleteMapping("/boletos/{id}")
-    public ResponseEntity<Void> deleteBoleto(@PathVariable UUID id) {
+    public ResponseEntity<Void> deleteBoleto(@PathVariable Long id) {
         log.debug("REST request to delete Boleto : {}", id);
         boletoService.delete(id);
         return ResponseEntity

@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.util.UUID;
 
@@ -15,7 +16,7 @@ import java.util.UUID;
  */
 @Entity
 @Table(name = "boleto", uniqueConstraints={
-        @UniqueConstraint(columnNames = {"uuid", "uuid_associado"})
+        @UniqueConstraint(columnNames = {"id", "uuid_associado"})
 })
 @SuppressWarnings("common-java:DuplicatedBlocks")
 public class Boleto implements Serializable {
@@ -28,9 +29,9 @@ public class Boleto implements Serializable {
      * Identificador único do boleto
      */
     @Id
-    @GeneratedValue
-    @Column(name = "uuid")
-    private UUID uuid;
+    @GeneratedValue(strategy=GenerationType.IDENTITY)
+    @Column(name = "id")
+    private Long id;
 
     /**
      * Valor do pagamento do boleto
@@ -84,17 +85,17 @@ public class Boleto implements Serializable {
     private String nomeFantasiaPagador;
 
 
-    public UUID getUuid() {
-        return this.uuid;
+    public Long getId() {
+        return this.id;
     }
 
-    public Boleto Uuid(UUID id) {
-        this.setUuid(id);
+    public Boleto Id(Long id) {
+        this.setId(id);
         return this;
     }
 
-    public void setUuid(UUID uuid) {
-        this.uuid = uuid;
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public BigDecimal getValor() {
@@ -107,7 +108,7 @@ public class Boleto implements Serializable {
     }
 
     public void setValor(BigDecimal valor) {
-        this.valor = valor;
+        this.valor = valor.setScale(2, RoundingMode.UP);
     }
 
     public LocalDate getVencimento() {
@@ -198,7 +199,7 @@ public class Boleto implements Serializable {
         if (!(o instanceof Boleto)) {
             return false;
         }
-        return uuid != null && uuid.equals(((Boleto) o).uuid);
+        return id != null && id.equals(((Boleto) o).id);
     }
 
     @Override
@@ -211,7 +212,7 @@ public class Boleto implements Serializable {
     @Override
     public String toString() {
         return "Boleto{" +
-                "Uuid=" + getUuid() +
+                "Id=" + getId() +
                 ", valor=" + getValor() +
                 ", vencimento='" + getVencimento() + "'" +
                 ", uuidAssociado='" + getUuidAssociado() + "'" +

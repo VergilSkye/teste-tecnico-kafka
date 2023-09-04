@@ -22,7 +22,7 @@ public class BoletoDTO implements Serializable {
      * Identificador único do boleto
      */
     @Schema(description = "Identificador único do boleto")
-    private UUID id;
+    private Long id;
 
     /**
      * Valor do pagamento do boleto

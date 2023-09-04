@@ -1,7 +1,7 @@
 package dev.vergil.boletos.service;
 
 import dev.vergil.boletos.domain.Boleto;
-import dev.vergil.boletos.kafka.consumer.AssociadoConsumerService;
+import dev.vergil.boletos.kafka.consumer.associado.AssociadoConsumerService;
 import dev.vergil.boletos.repository.BoletoRepository;
 import dev.vergil.boletos.service.dto.BoletoDTO;
 import dev.vergil.boletos.service.dto.PagamentoBoletoDTO;
@@ -15,10 +15,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.UUID;
+import java.math.BigDecimal;
+import java.util.*;
 
 /**
  * Service Implementation for managing {@link dev.vergil.boletos.domain.Boleto}.
@@ -104,13 +102,25 @@ public class BoletoService {
     }
 
     /**
+     * Get all the boletos of an associado.
+     *
+     * @return the list of entities of an associado.
+     */
+    @Transactional(readOnly = true)
+    public List<BoletoDTO> findAllBoletoByDocumentoPagador(String documento) {
+        log.debug("Request to get all Boletos by documento: ", documento);
+        return boletoRepository.findByDocumentoPagador(documento).stream().map(boletoMapper::toDto).toList();
+    }
+
+
+    /**
      * Get one boleto by id.
      *
      * @param id the id of the entity.
      * @return the entity.
      */
     @Transactional(readOnly = true)
-    public Optional<BoletoDTO> findOne(UUID id) {
+    public Optional<BoletoDTO> findOne(Long id) {
         log.debug("Request to get Boleto : {}", id);
         return boletoRepository.findById(id).map(boletoMapper::toDto);
     }
@@ -120,7 +130,7 @@ public class BoletoService {
      *
      * @param id the id of the entity.
      */
-    public void delete(UUID id) {
+    public void delete(Long id) {
         log.debug("Request to delete Boleto : {}", id);
         boletoRepository.deleteById(id);
     }
@@ -141,7 +151,8 @@ public class BoletoService {
     }
 
     private void compareAndValidateBoleto(PagamentoBoletoDTO pagamentoBoletoDTO, BoletoDTO boleto) throws MismatchValueException, MismatchIdentifierException, PaymentAlreadyMadeException {
-        if (!Objects.equals(pagamentoBoletoDTO.getValor(), boleto.getValor())) {
+        Comparator<BigDecimal> c = Comparator.nullsFirst(Comparator.naturalOrder());
+        if (c.compare(pagamentoBoletoDTO.getValor(), boleto.getValor()) != 0) {
             throw new MismatchValueException();
         }
         if (!Objects.equals(pagamentoBoletoDTO.getDocumentoPagador(), boleto.getDocumentoPagador())) {

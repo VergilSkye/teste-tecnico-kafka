@@ -13,11 +13,14 @@ import org.springframework.stereotype.Repository;
  */
 
 @Repository
-public interface BoletoRepository extends JpaRepository<Boleto, UUID> {
+public interface BoletoRepository extends JpaRepository<Boleto, Long> {
 
     @Modifying
-    @Query("update Boleto b set b.situacao = 'PAGO' where b.uuid=:uuid")
-    void payBoleto(UUID uuid);
+    @Query("update Boleto b set b.situacao = 'PAGO' where b.id=:uuid")
+    void payBoleto(Long uuid);
 
     List<Boleto> findByUuidAssociado(UUID uuidAssociado);
+
+    List<Boleto> findByDocumentoPagador(String documentoPagador);
+
 }

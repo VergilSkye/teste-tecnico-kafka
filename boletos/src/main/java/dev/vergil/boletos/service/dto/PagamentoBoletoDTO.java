@@ -5,7 +5,9 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.util.UUID;
@@ -15,6 +17,8 @@ import java.util.UUID;
  */
 @Data
 @Schema(description = "Pagamento de Boleto \n@author virgilio")
+@NoArgsConstructor
+@AllArgsConstructor
 @SuppressWarnings("common-java:DuplicatedBlocks")
 
 public class PagamentoBoletoDTO {
@@ -23,7 +27,7 @@ public class PagamentoBoletoDTO {
      * Identificador único do boleto
      */
     @Schema(description = "Identificador único do boleto")
-    private UUID id;
+    private Long id;
 
     /**
      * Documento do pagador
