@@ -11,7 +11,7 @@ import java.lang.annotation.*;
 @Documented
 public @interface CpfOrCnpj {
 
-    String message() default "Documento inválido";
+    String message() default "CPF ou CNPJ em formato inválido";
 
     Class<?>[] groups() default {};
 

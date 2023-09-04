@@ -28,7 +28,7 @@ public class BoletoDTO implements Serializable {
      * Valor do pagamento do boleto
      */
     @NotNull
-    @DecimalMin(value = "0")
+    @DecimalMin(value = "0", message = "Valores acima de 0")
     @Schema(description = "Valor do pagamento do boleto", required = true)
     private BigDecimal valor;
 
@@ -37,7 +37,7 @@ public class BoletoDTO implements Serializable {
      */
     @NotNull
     @Schema(description = "A data de vencimento do boleto. Tipo não levantado", required = true)
-    @PastOrPresent
+    @FutureOrPresent(message = "A data do boleto não pode está no passado" )
     private LocalDate vencimento;
 
     /**
@@ -60,7 +60,7 @@ public class BoletoDTO implements Serializable {
      * Nome do pagador
      */
     @NotNull
-    @Size(max = 50)
+    @Size(max = 50, message = "No máximo 50 caracteres")
     @Schema(description = "Nome do pagador", required = true)
     private String nomePagador;
 

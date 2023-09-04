@@ -43,14 +43,23 @@ public class BoletoService {
      */
     public BoletoDTO save(BoletoDTO boletoDTO) throws MismatchUuidAssociadoException, MismatchNameAssociadoException {
         log.debug("Request to save Boleto : {}", boletoDTO);
-        // buscar informações do Associado info, Se não da um thorw not find
-        AssociadoResponse associado = associadoService.getAssociado(boletoDTO.getDocumentoPagador());
+
+        AssociadoResponse associado = getAssociado(boletoDTO);
+
         compareAndValidateAssociado(boletoDTO, associado);
         Boleto boleto = boletoMapper.toEntity(boletoDTO);
         boleto = boletoRepository.save(boleto);
         return boletoMapper.toDto(boleto);
     }
 
+    private AssociadoResponse getAssociado(BoletoDTO boletoDTO) {
+        try {
+            return associadoService.getAssociado(boletoDTO.getDocumentoPagador());
+        } catch (Exception e) {
+            throw new AssociadoNotFoundException();
+        }
+
+    }
 
 
     private void compareAndValidateAssociado(BoletoDTO boletoDTO, AssociadoResponse associado) throws MismatchUuidAssociadoException, MismatchNameAssociadoException {
@@ -62,9 +71,7 @@ public class BoletoService {
         }
     }
 
-    private AssociadoResponse findAssociado(String documentoPagador) {
-        return new AssociadoResponse(UUID.randomUUID(), documentoPagador, "fantasia");
-    }
+
 
     /**
      * Update a boleto.
@@ -144,7 +151,7 @@ public class BoletoService {
      */
     public BoletoDTO pay(PagamentoBoletoDTO pagamentoBoletoDTO) throws MismatchValueException, MismatchIdentifierException, PaymentAlreadyMadeException {
         log.debug("Request to pay a Boleto : {}", pagamentoBoletoDTO);
-        BoletoDTO boleto = findOne(pagamentoBoletoDTO.getId()).orElseThrow(IllegalArgumentException::new);
+        BoletoDTO boleto = findOne(pagamentoBoletoDTO.getId()).orElseThrow(BoletoNotFoundValueException::new);
         compareAndValidateBoleto(pagamentoBoletoDTO, boleto);
         payBoleto(boleto);
         return boleto;

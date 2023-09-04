@@ -7,19 +7,18 @@ import org.springframework.web.ErrorResponseException;
 import java.net.URI;
 import java.time.Instant;
 
-public class MismatchUuidAssociadoException extends ErrorResponseException {
+public class BoletoNotFoundValueException extends ErrorResponseException {
 
-    public MismatchUuidAssociadoException() {
+    public BoletoNotFoundValueException() {
         super(HttpStatus.BAD_REQUEST, asProblemDetail(), null);
     }
 
     private static ProblemDetail asProblemDetail() {
-        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, "O documento informado não é o mesmo cadastrado");
-        problemDetail.setTitle("Mismatch Uuid Associado");
-        problemDetail.setType(URI.create("https://localhost:8081/mismatch-uuid-associado"));
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, "O boleto não foi encontrado por favor tente novamente");
+        problemDetail.setTitle("Boleto Not Found");
+        problemDetail.setType(URI.create("https://localhost:8081/boleto-not-found"));
         problemDetail.setProperty("timestamp", Instant.now());
         return problemDetail;
     }
-
 
 }
