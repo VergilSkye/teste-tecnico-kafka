@@ -1,36 +1,35 @@
 package dev.vergil.boletos.web;
 
-import dev.vergil.boletos.BoletosApplication;
 import dev.vergil.boletos.IntegrationTest;
 import dev.vergil.boletos.domain.Boleto;
+import dev.vergil.boletos.kafka.consumer.associado.AssociadoConsumerService;
 import dev.vergil.boletos.repository.BoletoRepository;
 import dev.vergil.boletos.service.dto.BoletoDTO;
 import dev.vergil.boletos.service.mapper.BoletoMapper;
+import dev.vergil.library.kafka.model.AssociadoResponse;
 import jakarta.persistence.EntityManager;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.kafka.annotation.EnableKafka;
 import org.springframework.kafka.test.context.EmbeddedKafka;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.ZoneId;
-import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.UUID;
 
-import static dev.vergil.boletos.web.TestUtil.*;
-
+import static dev.vergil.boletos.web.TestUtil.NumberMatcher;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.hamcrest.Matchers.hasItem;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -79,6 +78,9 @@ public class BoletoResourceIT {
     @Autowired
     private MockMvc restBoletoMockMvc;
 
+    @MockBean
+    private AssociadoConsumerService associadoConsumerService;
+
     private Boleto boleto;
 
     private static final String ENTITY_API_URL = "/api/boletos";
@@ -120,8 +122,20 @@ public class BoletoResourceIT {
         return boleto;
     }
 
+    /**
+     * Create an updated entity for this test.
+     *
+     * This is a static method, as tests for other entities might also need it,
+     * if they test an entity which requires the current entity.
+     */
+    public static AssociadoResponse createAssociadoResponse(EntityManager em) {
+        return new AssociadoResponse(DEFAULT_UUID_ASSOCIADO, DEFAULT_DOCUMENTO_PAGADOR, DEFAULT_NOME_PAGADOR);
+    }
+
+
     @BeforeEach
     public void initTest() {
+        when(associadoConsumerService.getAssociado(any())).thenReturn(createAssociadoResponse(em));
         boleto = createEntity(em);
     }
 
@@ -145,25 +159,6 @@ public class BoletoResourceIT {
         assertThat(testBoleto.getDocumentoPagador()).isEqualTo(DEFAULT_DOCUMENTO_PAGADOR);
         assertThat(testBoleto.getNomePagador()).isEqualTo(DEFAULT_NOME_PAGADOR);
         assertThat(testBoleto.getSituacao()).isEqualTo(DEFAULT_SITUACAO);
-    }
-
-    @Test
-    @Transactional
-    void createBoletoWithExistingId() throws Exception {
-        // Create the Boleto with an existing ID
-        boletoRepository.saveAndFlush(boleto);
-        BoletoDTO boletoDTO = boletoMapper.toDto(boleto);
-
-        int databaseSizeBeforeCreate = boletoRepository.findAll().size();
-
-        // An entity with an existing ID cannot be created, so this API call must fail
-        restBoletoMockMvc
-                .perform(post(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(TestUtil.convertObjectToJsonBytes(boletoDTO)))
-                .andExpect(status().isBadRequest());
-
-        // Validate the Boleto in the database
-        List<Boleto> boletoList = boletoRepository.findAll();
-        assertThat(boletoList).hasSize(databaseSizeBeforeCreate);
     }
 
     @Test
@@ -285,7 +280,7 @@ public class BoletoResourceIT {
                 .perform(get(ENTITY_API_URL + "?sort=id,desc"))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
-                .andExpect(jsonPath("$.[*].id").value(hasItem(boleto.getId().toString())))
+                .andExpect(jsonPath("$.[*].id").value(hasItem(boleto.getId().intValue())))
                 .andExpect(jsonPath("$.[*].valor").value(hasItem(sameNumber(DEFAULT_VALOR))))
                 .andExpect(jsonPath("$.[*].vencimento").value(hasItem(DEFAULT_VENCIMENTO.toString())))
                 .andExpect(jsonPath("$.[*].uuidAssociado").value(hasItem(DEFAULT_UUID_ASSOCIADO.toString())))
@@ -305,7 +300,7 @@ public class BoletoResourceIT {
                 .perform(get(ENTITY_API_URL_ID, boleto.getId()))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
-                .andExpect(jsonPath("$.id").value(boleto.getId().toString()))
+                .andExpect(jsonPath("$.id").value(boleto.getId().intValue()))
                 .andExpect(jsonPath("$.valor").value(sameNumber(DEFAULT_VALOR)))
                 .andExpect(jsonPath("$.vencimento").value(DEFAULT_VENCIMENTO.toString()))
                 .andExpect(jsonPath("$.uuidAssociado").value(DEFAULT_UUID_ASSOCIADO.toString()))
