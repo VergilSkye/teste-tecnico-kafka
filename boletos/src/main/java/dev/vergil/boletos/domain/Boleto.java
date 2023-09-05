@@ -108,7 +108,7 @@ public class Boleto implements Serializable {
     }
 
     public void setValor(BigDecimal valor) {
-        this.valor = valor.setScale(2, RoundingMode.UP);
+        this.valor = valor != null ? valor.setScale(2, RoundingMode.UP) : null;
     }
 
     public LocalDate getVencimento() {
